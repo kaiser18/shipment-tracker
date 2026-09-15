@@ -1,0 +1,18 @@
+const express = require("express");
+const shipmentController = require("./controller");
+
+const router = express.Router();
+
+router
+	.route("/")
+	.post(shipmentController.addShipment)
+	.get(shipmentController.getShipments);
+
+router
+	.route("/:id")
+	.get(shipmentController.getShipmentById)
+	.put(shipmentController.updateShipment)
+	.patch(shipmentController.updateShipment)
+	.delete(shipmentController.deleteShipment);
+
+module.exports = router;

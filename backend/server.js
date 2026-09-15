@@ -1,22 +1,23 @@
-const express = require('express');
-const cors = require('cors');
-const { Pool } = require('pg');
-require('dotenv').config();
+const http = require("http");
+require("dotenv").config();
+const app = require("./app");
+const sequelize = require("./utils/db");
+const seedDatabase = require("./utils/seed");
 
-const app = express();
-app.use(cors());
-app.use(express.json());
-
-// Configure PostgreSQL Connection
-const pool = new Pool({
-  user: process.env.DB_USER,
-  host: process.env.DB_HOST,
-  database: process.env.DB_DATABASE,
-  password: process.env.DB_PASSWORD,
-  port: process.env.DB_PORT,
-});
-
+const server = http.createServer(app);
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+
+const startServer = async () => {
+  try {
+    await sequelize.initializeDatabase();
+    await seedDatabase();
+    server.listen(PORT, () => {
+      console.log(`Server running on port: ${PORT}`);
+    });
+  } catch (err) {
+    console.error("✘ Error starting the server:", err);
+    process.exitCode = 1;
+  }
+};
+
+startServer();
