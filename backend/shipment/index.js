@@ -8,6 +8,8 @@ router
 	.post(shipmentController.addShipment)
 	.get(shipmentController.getShipments);
 
+router.route("/items").get(shipmentController.getItems);
+
 router
 	.route("/:id")
 	.get(shipmentController.getShipmentById)

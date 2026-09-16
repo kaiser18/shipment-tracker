@@ -14,6 +14,9 @@ test.beforeEach(() => {
     findAll: async () => [],
     findByPk: async () => undefined,
   };
+  Shipment.Item = {
+    findAll: async () => [],
+  };
 
   require.cache[modelPath] = {
     id: modelPath,
@@ -104,6 +107,20 @@ test("getShipmentById delegates to Shipment.findByPk", async () => {
 
   assert.strictEqual(result, shipment);
   assert.strictEqual(receivedId, 7);
+});
+
+test("getItems delegates to Item.findAll", async () => {
+  const items = [{ id: 1, name: "Wireless headphones", quantity: 1 }];
+  let called = false;
+  Shipment.Item.findAll = async () => {
+    called = true;
+    return items;
+  };
+
+  const result = await shipmentService.getItems();
+
+  assert.strictEqual(result, items);
+  assert.strictEqual(called, true);
 });
 
 test("updateShipment updates an existing shipment", async () => {

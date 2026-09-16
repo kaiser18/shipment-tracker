@@ -59,6 +59,23 @@ exports.getShipmentById = async (req, res, next) => {
   }
 };
 
+exports.getItems = async (req, res, next) => {
+  try {
+    const items = await shipmentService.getItems();
+    res.status(200).json({
+      status: "success",
+      data: {
+        items,
+      },
+    });
+  } catch (err) {
+    console.error(err);
+    res
+      .status(500)
+      .json({ status: "error", message: "Error retrieving items." });
+  }
+};
+
 exports.updateShipment = async (req, res, next) => {
   try {
     const shipmentData = req.body;

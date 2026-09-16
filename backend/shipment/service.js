@@ -1,4 +1,5 @@
 const Shipment = require("./model");
+const Item = Shipment.Item;
 
 exports.createShipment = async (shipmentData) => {
   return await Shipment.create(shipmentData);
@@ -20,6 +21,10 @@ exports.getShipments = (query) => {
 
 exports.getShipmentById = (id) => {
   return Shipment.findByPk(id);
+};
+
+exports.getItems = () => {
+  return Item.findAll();
 };
 
 exports.updateShipment = async (id, shipmentData) => {
