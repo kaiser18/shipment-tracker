@@ -89,6 +89,8 @@ export class NewShipment implements OnInit {
       }
     }
 
-    return date.toISOString().slice(0, 10);
+    date.setHours(17, 0, 0, 0);
+    const offset = date.getTimezoneOffset() * 60000;
+    return new Date(date.getTime() - offset).toISOString().slice(0, 16);
   }
 }

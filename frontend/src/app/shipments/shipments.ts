@@ -3,6 +3,7 @@ import { DatePipe } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTableModule } from '@angular/material/table';
 import { Shipment } from './model/shipment';
@@ -11,7 +12,14 @@ import { Shipment as ShipmentDialog } from './shipment/shipment';
 import { Shipments as ShipmentsService } from './service/shipments';
 
 @Component({
-  imports: [DatePipe, MatButtonModule, MatFormFieldModule, MatSelectModule, MatTableModule],
+  imports: [
+    DatePipe,
+    MatButtonModule,
+    MatFormFieldModule,
+    MatPaginatorModule,
+    MatSelectModule,
+    MatTableModule,
+  ],
   selector: 'app-shipments',
   styleUrl: './shipments.css',
   templateUrl: './shipments.html',
@@ -28,6 +36,9 @@ export class Shipments implements OnInit {
   );
   protected readonly selectedStatus = signal('all');
   protected readonly delayedOnly = signal(false);
+  protected readonly pageIndex = signal(0);
+  protected readonly pageSize = signal(10);
+  protected readonly pageSizeOptions = [5, 10, 25];
   protected readonly filteredShipments = computed(() => {
     const status = this.selectedStatus();
 
@@ -46,6 +57,10 @@ export class Shipments implements OnInit {
 
         return getPriority(second) - getPriority(first);
       });
+  });
+  protected readonly paginatedShipments = computed(() => {
+    const start = this.pageIndex() * this.pageSize();
+    return this.filteredShipments().slice(start, start + this.pageSize());
   });
   protected readonly isLoading = signal(true);
   protected readonly errorMessage = signal('');
@@ -100,11 +115,18 @@ export class Shipments implements OnInit {
   protected setStatusFilter(status: string): void {
     this.selectedStatus.set(status);
     this.delayedOnly.set(false);
+    this.pageIndex.set(0);
   }
 
   protected toggleDelayedOnly(): void {
     this.delayedOnly.update((showDelayed) => !showDelayed);
     this.selectedStatus.set('all');
+    this.pageIndex.set(0);
+  }
+
+  protected setPage(event: PageEvent): void {
+    this.pageIndex.set(event.pageIndex);
+    this.pageSize.set(event.pageSize);
   }
 
   protected isDelayed(shipment: Shipment): boolean {
@@ -112,9 +134,8 @@ export class Shipments implements OnInit {
       return false;
     }
 
-    const promisedDate = new Date(`${shipment.promisedDate}T00:00:00`);
+    const promisedDate = new Date(shipment.promisedDate);
     const today = new Date();
-    today.setHours(0, 0, 0, 0);
     return promisedDate < today;
   }
 }

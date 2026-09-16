@@ -15,7 +15,7 @@ export class Shipments {
   private readonly http = inject(HttpClient);
 
   getShipments(): Observable<Shipment[]> {
-    return this.http.get<ShipmentsResponse>('http://localhost:3000/shipments').pipe(
+    return this.http.get<ShipmentsResponse>('http://localhost:3000/shipments?limit=1000').pipe(
       map((response) =>
         response.data.shipments.map((shipment) => ({
           id: shipment.id,

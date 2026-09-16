@@ -112,6 +112,10 @@ table {
   min-width: 620px;
 }
 
+mat-paginator {
+  border-top: 1px solid #dce5e8;
+}
+
 .mat-mdc-header-cell {
   color: #48606a;
   font-size: 0.75rem;

@@ -19,45 +19,123 @@ const seedDatabase = async () => {
     [
       {
         address: "12 Oak Avenue, Portland",
-        promisedDate: "2026-09-18",
+        promisedDate: "2026-09-18T17:00:00",
         status: "pending",
         userId: users[0].id,
       },
       {
         address: "88 Market Street, Seattle",
-        promisedDate: "2026-09-16",
+        promisedDate: "2026-09-16T09:30:00",
         status: "in transit",
         userId: users[0].id,
       },
       {
         address: "405 Pine Road, Denver",
-        promisedDate: "2026-09-14",
+        promisedDate: "2026-09-14T14:15:00",
         status: "delivered",
         userId: users[1].id,
       },
       {
         address: "7 Harbor Lane, Boston",
-        promisedDate: "2026-09-22",
+        promisedDate: "2026-09-22T11:45:00",
         status: "at hub",
         userId: users[1].id,
       },
       {
         address: "29 River Road, Austin",
-        promisedDate: "2026-09-12",
+        promisedDate: "2026-09-12T16:30:00",
         status: "pending",
         userId: users[0].id,
       },
       {
         address: "64 Sunset Boulevard, Phoenix",
-        promisedDate: "2026-09-16",
+        promisedDate: "2026-09-16T18:00:00",
         status: "out for delivery",
         userId: users[1].id,
       },
       {
         address: "17 Lakeview Drive, Chicago",
-        promisedDate: "2026-09-11",
+        promisedDate: "2026-09-11T10:00:00",
         status: "in transit",
         userId: users[1].id,
+      },
+      {
+        address: "52 Elm Street, San Francisco",
+        promisedDate: "2026-09-19T13:00:00",
+        status: "pending",
+        userId: users[0].id,
+      },
+      {
+        address: "103 Maple Avenue, Dallas",
+        promisedDate: "2026-09-17T15:30:00",
+        status: "in transit",
+        userId: users[1].id,
+      },
+      {
+        address: "26 Cedar Court, Atlanta",
+        promisedDate: "2026-09-20T09:15:00",
+        status: "at hub",
+        userId: users[0].id,
+      },
+      {
+        address: "71 Birch Road, Miami",
+        promisedDate: "2026-09-21T17:45:00",
+        status: "out for delivery",
+        userId: users[1].id,
+      },
+      {
+        address: "9 Willow Lane, Minneapolis",
+        promisedDate: "2026-09-15T08:30:00",
+        status: "pending",
+        userId: users[0].id,
+      },
+      {
+        address: "144 Spruce Street, Nashville",
+        promisedDate: "2026-09-23T12:00:00",
+        status: "delivered",
+        userId: users[1].id,
+      },
+      {
+        address: "38 Aspen Drive, Salt Lake City",
+        promisedDate: "2026-09-18T16:45:00",
+        status: "in transit",
+        userId: users[0].id,
+      },
+      {
+        address: "215 Walnut Avenue, Charlotte",
+        promisedDate: "2026-09-24T10:30:00",
+        status: "at hub",
+        userId: users[1].id,
+      },
+      {
+        address: "63 Poplar Street, Columbus",
+        promisedDate: "2026-09-16T20:00:00",
+        status: "out for delivery",
+        userId: users[0].id,
+      },
+      {
+        address: "87 Fir Road, Raleigh",
+        promisedDate: "2026-09-22T14:00:00",
+        status: "pending",
+        userId: users[1].id,
+      },
+      {
+        address: "190 Chestnut Lane, Cleveland",
+        promisedDate: "2026-09-14T11:30:00",
+        status: "delivered",
+        userId: users[0].id,
+      },
+      {
+        address: "44 Hawthorn Court, Richmond",
+        promisedDate: "2026-09-19T09:45:00",
+        status: "in transit",
+        userId: users[1].id,
+      },
+      {
+        address: "120 Magnolia Boulevard, New Orleans",
+        promisedDate: "2026-09-25T18:30:00",
+        status: "at hub",
+        userId: users[0].id,
       },
     ],
     { returning: true },
@@ -80,6 +158,13 @@ const seedDatabase = async () => {
   await shipments[4].addItems([items[3]]);
   await shipments[5].addItems([items[1], items[3]]);
   await shipments[6].addItems([items[0], items[2]]);
+  await Promise.all(
+    shipments
+      .slice(7)
+      .map((shipment, index) =>
+        shipment.addItems([items[index % items.length]]),
+      ),
+  );
 
   const eventDefinitions = [
     [["pending", "2026-09-10", "Portland distribution center"]],
@@ -111,9 +196,14 @@ const seedDatabase = async () => {
       ["in transit", "2026-09-08", "Chicago regional hub"],
     ],
   ];
+  const allEventDefinitions = eventDefinitions.concat(
+    shipments
+      .slice(7)
+      .map((shipment) => [[shipment.status, "2026-09-16", shipment.address]]),
+  );
 
   await Event.bulkCreate(
-    eventDefinitions.flatMap((events, shipmentIndex) =>
+    allEventDefinitions.flatMap((events, shipmentIndex) =>
       events.map(([status, eventDate, address]) => ({
         shipmentId: shipments[shipmentIndex].id,
         status,

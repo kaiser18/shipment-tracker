@@ -14,7 +14,7 @@ const Shipment = sequelize.define(
       allowNull: false,
     },
     promisedDate: {
-      type: DataTypes.DATEONLY,
+      type: DataTypes.DATE,
       allowNull: false,
     },
     status: {
