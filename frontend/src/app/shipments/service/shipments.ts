@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { map, Observable } from 'rxjs';
-import { Shipment } from '../model/shipment';
+import { Shipment, ShipmentEvent } from '../model/shipment';
 import { ShipmentItem, ShipmentUser } from '../model/shipment';
 
 interface ShipmentsResponse {
@@ -52,5 +52,17 @@ export class Shipments {
     return this.http
       .post<{ data: { newShipment: Shipment } }>('http://localhost:3000/shipments', payload)
       .pipe(map((response) => response.data.newShipment));
+  }
+
+  recordShipmentEvent(
+    shipmentId: number,
+    payload: { status: Shipment['status']; address: string; eventDate: string },
+  ): Observable<ShipmentEvent> {
+    return this.http
+      .post<{ data: { event: ShipmentEvent } }>(
+        `http://localhost:3000/shipments/${shipmentId}/events`,
+        payload,
+      )
+      .pipe(map((response) => response.data.event));
   }
 }

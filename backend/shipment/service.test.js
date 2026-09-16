@@ -102,6 +102,32 @@ test("createShipment associates selected items", async () => {
   assert.deepStrictEqual(receivedItems, [2, 3]);
 });
 
+test("createShipment records the initial status event", async () => {
+  const shipment = {
+    id: 8,
+    status: "pending",
+    addItems: async () => undefined,
+  };
+  let eventData;
+  Shipment.create = async () => shipment;
+  Shipment.Event.create = async (data) => {
+    eventData = data;
+    return data;
+  };
+
+  await shipmentService.createShipment({
+    address: "12 Main Street",
+    promisedDate: "2026-09-20",
+    userId: 1,
+    eventAddress: "Origin warehouse",
+  });
+
+  assert.strictEqual(eventData.shipmentId, 8);
+  assert.strictEqual(eventData.status, "pending");
+  assert.strictEqual(eventData.address, "Origin warehouse");
+  assert.ok(eventData.eventDate instanceof Date);
+});
+
 test("getShipments applies status, pagination, and descending status order", async () => {
   const shipments = [{ id: 2, status: "pending" }];
   let options;
@@ -188,6 +214,100 @@ test("getShipmentById delegates to Shipment.findByPk", async () => {
       },
     ],
   });
+});
+
+test("recordShipmentEvent records only the next status and updates the shipment", async () => {
+  const shipment = {
+    id: 7,
+    status: "in transit",
+    update: async (data) => {
+      shipment.status = data.status;
+      return shipment;
+    },
+  };
+  let eventData;
+  Shipment.findByPk = async () => shipment;
+  Shipment.Event.create = async (data) => {
+    eventData = data;
+    return { id: 3, ...data };
+  };
+
+  const result = await shipmentService.recordShipmentEvent(7, {
+    status: "at hub",
+    address: "Spokane regional hub",
+    eventDate: "2026-09-16T10:00:00.000Z",
+  });
+
+  assert.deepStrictEqual(result, {
+    id: 3,
+    shipmentId: 7,
+    status: "at hub",
+    address: "Spokane regional hub",
+    eventDate: "2026-09-16T10:00:00.000Z",
+  });
+  assert.strictEqual(shipment.status, "at hub");
+  assert.deepStrictEqual(eventData, {
+    shipmentId: 7,
+    status: "at hub",
+    address: "Spokane regional hub",
+    eventDate: "2026-09-16T10:00:00.000Z",
+  });
+});
+
+test("recordShipmentEvent rejects a status that skips the next step", async () => {
+  Shipment.findByPk = async () => ({ id: 7, status: "pending" });
+
+  await assert.rejects(
+    shipmentService.recordShipmentEvent(7, {
+      status: "at hub",
+      address: "Spokane regional hub",
+      eventDate: "2026-09-16T10:00:00.000Z",
+    }),
+    { message: "Next shipment status must be in transit" },
+  );
+});
+
+test("recordShipmentEvent rejects events after delivery", async () => {
+  Shipment.findByPk = async () => ({ id: 7, status: "delivered" });
+
+  await assert.rejects(
+    shipmentService.recordShipmentEvent(7, {
+      status: "delivered",
+      address: "Delivery station",
+      eventDate: "2026-09-16T10:00:00.000Z",
+    }),
+    { message: "Next shipment status must be none" },
+  );
+});
+
+test("updateShipment records an event when the status changes", async () => {
+  const shipment = {
+    id: 4,
+    status: "at hub",
+    update: async (data) => {
+      shipment.status = data.status;
+      return shipment;
+    },
+  };
+  let eventData;
+  Shipment.findByPk = async () => shipment;
+  Shipment.Event.create = async (data) => {
+    eventData = data;
+    return data;
+  };
+
+  await shipmentService.updateShipment(4, {
+    status: "out for delivery",
+    eventAddress: "Local delivery depot",
+  });
+
+  assert.deepStrictEqual(eventData, {
+    shipmentId: 4,
+    status: "out for delivery",
+    address: "Local delivery depot",
+    eventDate: eventData.eventDate,
+  });
+  assert.ok(eventData.eventDate instanceof Date);
 });
 
 test("getItems delegates to Item.findAll", async () => {

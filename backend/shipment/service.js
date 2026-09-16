@@ -2,6 +2,13 @@ const Shipment = require("./model");
 const User = require("../user/model");
 const Item = Shipment.Item;
 const Event = Shipment.Event;
+const statusSequence = [
+  "pending",
+  "in transit",
+  "at hub",
+  "out for delivery",
+  "delivered",
+];
 
 exports.createShipment = async (shipmentData) => {
   const { itemIds = [], eventAddress, ...shipmentFields } = shipmentData;
@@ -64,20 +71,47 @@ exports.getItems = () => {
   return Item.findAll();
 };
 
+exports.recordShipmentEvent = async (id, eventData) => {
+  const shipment = await Shipment.findByPk(id, {
+    include: [{ model: Event, as: "events", separate: true }],
+  });
+  if (!shipment) {
+    throw new Error("Shipment not found");
+  }
+
+  const currentStatus = shipment.status;
+  const nextStatus = statusSequence[statusSequence.indexOf(currentStatus) + 1];
+  if (!nextStatus || eventData.status !== nextStatus) {
+    throw new Error(`Next shipment status must be ${nextStatus ?? "none"}`);
+  }
+
+  const event = await Event.create({
+    shipmentId: shipment.id,
+    status: nextStatus,
+    eventDate: eventData.eventDate,
+    address: eventData.address,
+  });
+  await shipment.update({ status: nextStatus });
+  return event;
+};
+
 exports.updateShipment = async (id, shipmentData) => {
   const shipment = await Shipment.findByPk(id);
   if (!shipment) {
     throw new Error("Shipment not found");
   }
   const previousStatus = shipment.status;
-  const updatedShipment = await shipment.update(shipmentData);
+  const { eventAddress, ...shipmentFields } = shipmentData;
+  const updatedShipment = await shipment.update(
+    eventAddress === undefined ? shipmentData : shipmentFields,
+  );
 
   if (shipmentData.status && shipmentData.status !== previousStatus) {
     await Event.create({
       shipmentId: shipment.id,
       status: shipmentData.status,
       eventDate: new Date(),
-      address: shipmentData.eventAddress ?? "Shipment facility",
+      address: eventAddress ?? "Shipment facility",
     });
   }
 

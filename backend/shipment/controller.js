@@ -90,6 +90,26 @@ exports.getItems = async (req, res, next) => {
   }
 };
 
+exports.recordShipmentEvent = async (req, res, next) => {
+  try {
+    const event = await shipmentService.recordShipmentEvent(
+      req.params.id,
+      req.body,
+    );
+    res.status(201).json({
+      status: "success",
+      message: "Shipment event recorded successfully.",
+      data: { event },
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(err.message === "Shipment not found" ? 404 : 400).json({
+      status: "error",
+      message: err.message,
+    });
+  }
+};
+
 exports.updateShipment = async (req, res, next) => {
   try {
     const shipmentData = req.body;

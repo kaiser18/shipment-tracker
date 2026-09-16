@@ -31,9 +31,13 @@ export class Shipments implements OnInit {
           (!this.delayedOnly() && (status === 'all' || shipment.status === status)),
       )
       .sort((first, second) => {
-        const firstDelayed = this.isDelayed(first) ? 1 : 0;
-        const secondDelayed = this.isDelayed(second) ? 1 : 0;
-        return secondDelayed - firstDelayed;
+        const getPriority = (shipment: Shipment): number => {
+          if (this.isDelayed(shipment)) return 2;
+          if (shipment.status === 'delivered') return 0;
+          return 1;
+        };
+
+        return getPriority(second) - getPriority(first);
       });
   });
   protected readonly isLoading = signal(true);
@@ -55,11 +59,19 @@ export class Shipments implements OnInit {
   }
 
   protected openShipment(shipment: Shipment): void {
-    this.dialog.open(ShipmentDialog, {
+    const dialogRef = this.dialog.open(ShipmentDialog, {
       data: shipment,
       width: 'min(92vw, 560px)',
       maxWidth: '100vw',
       autoFocus: 'dialog',
+    });
+
+    dialogRef.afterClosed().subscribe((updated: boolean) => {
+      if (updated) {
+        this.shipmentsService.getShipments().subscribe({
+          next: (shipments) => this.shipments.set(shipments),
+        });
+      }
     });
   }
 

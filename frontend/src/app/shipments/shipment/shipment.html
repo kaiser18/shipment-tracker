@@ -45,8 +45,43 @@
     </section>
   }
 
-  @if (shipment.events?.length) {
-    <section class="timeline-section" aria-labelledby="timeline-heading">
+  <section class="timeline-section" aria-labelledby="timeline-heading">
+    <div class="timeline-header">
+      <h3 id="timeline-heading">Shipment timeline</h3>
+      @if (nextStatus()) {
+        <button mat-stroked-button type="button" (click)="recordEvent()">Record event</button>
+      }
+    </div>
+    @if (isRecording()) {
+      <form class="event-form" [formGroup]="eventForm" (ngSubmit)="submitEvent()">
+        @if (errorMessage()) {
+          <p class="error-message" role="alert">{{ errorMessage() }}</p>
+        }
+        <mat-form-field appearance="outline">
+          <mat-label>Next status</mat-label>
+          <mat-select formControlName="status">
+            @if (nextStatus()) {
+              <mat-option [value]="nextStatus()">{{ nextStatus() }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Location</mat-label>
+          <input matInput formControlName="address" />
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Time happened</mat-label>
+          <input matInput type="datetime-local" formControlName="eventDate" />
+        </mat-form-field>
+        <div class="event-actions">
+          <button mat-button type="button" (click)="cancelEvent()">Cancel</button>
+          <button mat-flat-button type="submit" [disabled]="isSubmitting()">
+            {{ isSubmitting() ? 'Saving...' : 'Save event' }}
+          </button>
+        </div>
+      </form>
+    }
+    @if (shipment.events?.length) {
       <h3 id="timeline-heading">Shipment timeline</h3>
       <ol class="timeline">
         @for (event of shipment.events; track event.id) {
@@ -64,8 +99,8 @@
           </li>
         }
       </ol>
-    </section>
-  }
+    }
+  </section>
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
