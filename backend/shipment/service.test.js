@@ -1,0 +1,163 @@
+const assert = require("node:assert/strict");
+const test = require("node:test");
+
+const modelPath = require.resolve("./model");
+const servicePath = require.resolve("./service");
+const originalModelModule = require.cache[modelPath];
+
+let Shipment;
+let shipmentService;
+
+test.beforeEach(() => {
+  Shipment = {
+    create: async () => undefined,
+    findAll: async () => [],
+    findByPk: async () => undefined,
+  };
+
+  require.cache[modelPath] = {
+    id: modelPath,
+    filename: modelPath,
+    loaded: true,
+    exports: Shipment,
+  };
+  delete require.cache[servicePath];
+  shipmentService = require("./service");
+});
+
+test.after(() => {
+  delete require.cache[servicePath];
+  if (originalModelModule) {
+    require.cache[modelPath] = originalModelModule;
+  } else {
+    delete require.cache[modelPath];
+  }
+});
+
+test("createShipment delegates to Shipment.create", async () => {
+  const shipmentData = {
+    address: "12 Main Street",
+    promisedDate: "2026-09-20",
+  };
+  const createdShipment = { id: 1, ...shipmentData };
+  let receivedData;
+  Shipment.create = async (data) => {
+    receivedData = data;
+    return createdShipment;
+  };
+
+  const result = await shipmentService.createShipment(shipmentData);
+
+  assert.strictEqual(result, createdShipment);
+  assert.strictEqual(receivedData, shipmentData);
+});
+
+test("getShipments applies status, pagination, and descending status order", async () => {
+  const shipments = [{ id: 2, status: "pending" }];
+  let options;
+  Shipment.findAll = async (queryOptions) => {
+    options = queryOptions;
+    return shipments;
+  };
+
+  const result = await shipmentService.getShipments({
+    page: 3,
+    limit: 5,
+    status: "pending",
+  });
+
+  assert.strictEqual(result, shipments);
+  assert.deepStrictEqual(options, {
+    where: { status: "pending" },
+    limit: 5,
+    offset: 10,
+    order: [["status", "DESC"]],
+  });
+});
+
+test("getShipments uses defaults and an empty filter when no status is provided", async () => {
+  let options;
+  Shipment.findAll = async (queryOptions) => {
+    options = queryOptions;
+    return [];
+  };
+
+  await shipmentService.getShipments({});
+
+  assert.deepStrictEqual(options, {
+    where: {},
+    limit: 10,
+    offset: 0,
+    order: [["status", "DESC"]],
+  });
+});
+
+test("getShipmentById delegates to Shipment.findByPk", async () => {
+  const shipment = { id: 7 };
+  let receivedId;
+  Shipment.findByPk = async (id) => {
+    receivedId = id;
+    return shipment;
+  };
+
+  const result = await shipmentService.getShipmentById(7);
+
+  assert.strictEqual(result, shipment);
+  assert.strictEqual(receivedId, 7);
+});
+
+test("updateShipment updates an existing shipment", async () => {
+  const shipment = { update: async () => undefined };
+  const shipmentData = { status: "delivered" };
+  let receivedId;
+  let receivedData;
+  Shipment.findByPk = async (id) => {
+    receivedId = id;
+    return shipment;
+  };
+  shipment.update = async (data) => {
+    receivedData = data;
+    return { ...shipment, ...data };
+  };
+
+  const result = await shipmentService.updateShipment(4, shipmentData);
+
+  assert.deepStrictEqual(result, {
+    update: shipment.update,
+    status: "delivered",
+  });
+  assert.strictEqual(receivedId, 4);
+  assert.strictEqual(receivedData, shipmentData);
+});
+
+test("updateShipment throws when the shipment does not exist", async () => {
+  Shipment.findByPk = async () => null;
+
+  await assert.rejects(
+    shipmentService.updateShipment(99, { status: "delivered" }),
+    { message: "Shipment not found" },
+  );
+});
+
+test("deleteShipment destroys an existing shipment", async () => {
+  let destroyed = false;
+  const shipment = {
+    destroy: async () => {
+      destroyed = true;
+    },
+  };
+  Shipment.findByPk = async () => shipment;
+
+  const result = await shipmentService.deleteShipment(5);
+
+  assert.strictEqual(result, undefined);
+  assert.strictEqual(destroyed, true);
+});
+
+test("deleteShipment throws when the shipment does not exist", async () => {
+  Shipment.findByPk = async () => null;
+
+  await assert.rejects(shipmentService.deleteShipment(99), {
+    message: "Shipment not found",
+  });
+});
