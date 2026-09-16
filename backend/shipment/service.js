@@ -1,18 +1,22 @@
 const Shipment = require("./model");
 const User = require("../user/model");
 const Item = Shipment.Item;
+const Event = Shipment.Event;
 
 exports.createShipment = async (shipmentData) => {
-  if (!shipmentData.itemIds) {
-    return await Shipment.create(shipmentData);
-  }
-
-  const { itemIds = [], ...shipmentFields } = shipmentData;
+  const { itemIds = [], eventAddress, ...shipmentFields } = shipmentData;
   const shipment = await Shipment.create(shipmentFields);
 
   if (itemIds.length > 0) {
     await shipment.addItems(itemIds);
   }
+
+  await Event.create({
+    shipmentId: shipment.id,
+    status: shipment.status,
+    eventDate: new Date(),
+    address: eventAddress ?? "Shipment origin",
+  });
 
   return shipment;
 };
@@ -31,6 +35,12 @@ exports.getShipments = (query) => {
     include: [
       { model: Item, as: "items" },
       { model: User, as: "user" },
+      {
+        model: Event,
+        as: "events",
+        separate: true,
+        order: [["eventDate", "ASC"]],
+      },
     ],
   });
 };
@@ -40,6 +50,12 @@ exports.getShipmentById = (id) => {
     include: [
       { model: Item, as: "items" },
       { model: User, as: "user" },
+      {
+        model: Event,
+        as: "events",
+        separate: true,
+        order: [["eventDate", "ASC"]],
+      },
     ],
   });
 };
@@ -53,7 +69,19 @@ exports.updateShipment = async (id, shipmentData) => {
   if (!shipment) {
     throw new Error("Shipment not found");
   }
-  return await shipment.update(shipmentData);
+  const previousStatus = shipment.status;
+  const updatedShipment = await shipment.update(shipmentData);
+
+  if (shipmentData.status && shipmentData.status !== previousStatus) {
+    await Event.create({
+      shipmentId: shipment.id,
+      status: shipmentData.status,
+      eventDate: new Date(),
+      address: shipmentData.eventAddress ?? "Shipment facility",
+    });
+  }
+
+  return updatedShipment;
 };
 
 exports.deleteShipment = async (id) => {

@@ -20,6 +20,9 @@ test.beforeEach(() => {
   Shipment.Item = {
     findAll: async () => [],
   };
+  Shipment.Event = {
+    create: async () => undefined,
+  };
   User = {};
 
   require.cache[modelPath] = {
@@ -67,7 +70,7 @@ test("createShipment delegates to Shipment.create", async () => {
   const result = await shipmentService.createShipment(shipmentData);
 
   assert.strictEqual(result, createdShipment);
-  assert.strictEqual(receivedData, shipmentData);
+  assert.deepStrictEqual(receivedData, shipmentData);
 });
 
 test("createShipment associates selected items", async () => {
@@ -122,6 +125,12 @@ test("getShipments applies status, pagination, and descending status order", asy
     include: [
       { model: Shipment.Item, as: "items" },
       { model: User, as: "user" },
+      {
+        model: Shipment.Event,
+        as: "events",
+        separate: true,
+        order: [["eventDate", "ASC"]],
+      },
     ],
   });
 });
@@ -143,6 +152,12 @@ test("getShipments uses defaults and an empty filter when no status is provided"
     include: [
       { model: Shipment.Item, as: "items" },
       { model: User, as: "user" },
+      {
+        model: Shipment.Event,
+        as: "events",
+        separate: true,
+        order: [["eventDate", "ASC"]],
+      },
     ],
   });
 });
@@ -165,6 +180,12 @@ test("getShipmentById delegates to Shipment.findByPk", async () => {
     include: [
       { model: Shipment.Item, as: "items" },
       { model: User, as: "user" },
+      {
+        model: Shipment.Event,
+        as: "events",
+        separate: true,
+        order: [["eventDate", "ASC"]],
+      },
     ],
   });
 });

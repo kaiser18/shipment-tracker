@@ -44,6 +44,28 @@
       </ul>
     </section>
   }
+
+  @if (shipment.events?.length) {
+    <section class="timeline-section" aria-labelledby="timeline-heading">
+      <h3 id="timeline-heading">Shipment timeline</h3>
+      <ol class="timeline">
+        @for (event of shipment.events; track event.id) {
+          <li class="timeline-event">
+            <span class="timeline-marker" aria-hidden="true"></span>
+            <div class="timeline-content">
+              <div class="timeline-heading">
+                <strong>{{ event.status }}</strong>
+                <time [attr.datetime]="event.eventDate">
+                  {{ event.eventDate | date: 'MMM d, y' }}
+                </time>
+              </div>
+              <span>{{ event.address }}</span>
+            </div>
+          </li>
+        }
+      </ol>
+    </section>
+  }
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">

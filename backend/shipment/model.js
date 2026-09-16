@@ -67,5 +67,36 @@ const Item = sequelize.define("Item", {
 Shipment.belongsToMany(Item, { as: "items", through: "ShipmentItems" });
 Item.belongsToMany(Shipment, { as: "shipments", through: "ShipmentItems" });
 
+const ShipmentEvent = sequelize.define("ShipmentEvent", {
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    allowNull: false,
+    autoIncrement: true,
+  },
+  status: {
+    type: DataTypes.ENUM(
+      "pending",
+      "in transit",
+      "at hub",
+      "out for delivery",
+      "delivered",
+    ),
+    allowNull: false,
+  },
+  eventDate: {
+    type: DataTypes.DATE,
+    allowNull: false,
+  },
+  address: {
+    type: DataTypes.STRING(255),
+    allowNull: false,
+  },
+});
+
+Shipment.hasMany(ShipmentEvent, { as: "events", foreignKey: "shipmentId" });
+ShipmentEvent.belongsTo(Shipment, { as: "shipment", foreignKey: "shipmentId" });
+
 module.exports = Shipment;
 module.exports.Item = Item;
+module.exports.Event = ShipmentEvent;

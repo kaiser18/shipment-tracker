@@ -10,6 +10,7 @@ const serializeShipment = (shipment) => {
     userName: data.userName ?? user.name ?? "",
     userSurname: data.userSurname ?? user.surname ?? "",
     items: data.items ?? [],
+    events: data.events ?? [],
   };
 };
 

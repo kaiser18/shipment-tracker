@@ -25,6 +25,7 @@ export class Shipments {
           userName: shipment.userName ?? '',
           userSurname: shipment.userSurname ?? '',
           items: shipment.items ?? [],
+          events: shipment.events ?? [],
         })),
       ),
     );

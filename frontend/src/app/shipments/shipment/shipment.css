@@ -112,6 +112,66 @@ h3 {
   white-space: nowrap;
 }
 
+.timeline-section {
+  margin-top: 1.5rem;
+}
+
+.timeline {
+  position: relative;
+  display: grid;
+  gap: 0;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.timeline-event {
+  position: relative;
+  display: flex;
+  gap: 0.85rem;
+  min-height: 4.25rem;
+}
+
+.timeline-event:not(:last-child)::before {
+  position: absolute;
+  top: 0.75rem;
+  bottom: 0;
+  left: 0.32rem;
+  width: 2px;
+  background: #dce5e8;
+  content: '';
+}
+
+.timeline-marker {
+  z-index: 1;
+  flex: 0 0 0.7rem;
+  width: 0.7rem;
+  height: 0.7rem;
+  margin-top: 0.25rem;
+  border: 2px solid #007c83;
+  border-radius: 50%;
+  background: #fff;
+}
+
+.timeline-content {
+  display: grid;
+  gap: 0.25rem;
+  padding-bottom: 1rem;
+  color: #60727a;
+  font-size: 0.85rem;
+}
+
+.timeline-heading {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  color: #243c46;
+}
+
+.timeline-heading strong {
+  text-transform: capitalize;
+}
+
 @media (max-width: 520px) {
   .dialog-header {
     flex-direction: column;

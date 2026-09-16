@@ -4,6 +4,7 @@ export interface Shipment {
   status: ShipmentStatus;
   promisedDate: string;
   items?: ShipmentItem[];
+  events?: ShipmentEvent[];
   userName?: string;
   userSurname?: string;
 }
@@ -14,6 +15,13 @@ export interface ShipmentItem {
   id: number;
   name: string;
   quantity: number;
+}
+
+export interface ShipmentEvent {
+  id: number;
+  status: ShipmentStatus;
+  eventDate: string;
+  address: string;
 }
 
 export interface ShipmentUser {
