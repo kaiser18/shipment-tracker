@@ -2,6 +2,7 @@ const Shipment = require("./model");
 const User = require("../user/model");
 const Item = Shipment.Item;
 const Event = Shipment.Event;
+const sequelize = Shipment.sequelize;
 const statusSequence = [
   "pending",
   "in transit",
@@ -72,25 +73,33 @@ exports.getItems = () => {
 };
 
 exports.recordShipmentEvent = async (id, eventData) => {
-  const shipment = await Shipment.findByPk(id, {
-    include: [{ model: Event, as: "events", separate: true }],
-  });
-  if (!shipment) {
-    throw new Error("Shipment not found");
-  }
+  return sequelize.transaction(async (transaction) => {
+    const shipment = await Shipment.findByPk(id, {
+      include: [{ model: Event, as: "events", separate: true }],
+      lock: transaction.LOCK.UPDATE,
+      transaction,
+    });
+    if (!shipment) {
+      throw new Error("Shipment not found");
+    }
 
-  const currentStatus = shipment.status;
-  const nextStatus = statusSequence[statusSequence.indexOf(currentStatus) + 1];
-  if (!nextStatus || eventData.status !== nextStatus) {
-    throw new Error(`Next shipment status must be ${nextStatus ?? "none"}`);
-  }
+    const currentStatus = shipment.status;
+    const nextStatus =
+      statusSequence[statusSequence.indexOf(currentStatus) + 1];
+    if (!nextStatus || eventData.status !== nextStatus) {
+      throw new Error(`Next shipment status must be ${nextStatus ?? "none"}`);
+    }
 
-  const event = await Event.create({
-    shipmentId: shipment.id,
-    status: nextStatus,
-    eventDate: eventData.eventDate,
-    address: eventData.address,
+    const event = await Event.create(
+      {
+        shipmentId: shipment.id,
+        status: nextStatus,
+        eventDate: eventData.eventDate,
+        address: eventData.address,
+      },
+      { transaction },
+    );
+    await shipment.update({ status: nextStatus }, { transaction });
+    return event;
   });
-  await shipment.update({ status: nextStatus });
-  return event;
 };

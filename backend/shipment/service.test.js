@@ -13,6 +13,9 @@ let shipmentService;
 
 test.beforeEach(() => {
   Shipment = {
+    sequelize: {
+      transaction: async (callback) => callback({ LOCK: { UPDATE: "UPDATE" } }),
+    },
     create: async () => undefined,
     findAll: async () => [],
     findByPk: async () => undefined,
@@ -226,10 +229,22 @@ test("recordShipmentEvent records only the next status and updates the shipment"
     },
   };
   let eventData;
-  Shipment.findByPk = async () => shipment;
-  Shipment.Event.create = async (data) => {
+  let findOptions;
+  let eventOptions;
+  let updateOptions;
+  Shipment.findByPk = async (id, options) => {
+    findOptions = options;
+    return shipment;
+  };
+  Shipment.Event.create = async (data, options) => {
     eventData = data;
+    eventOptions = options;
     return { id: 3, ...data };
+  };
+  shipment.update = async (data, options) => {
+    shipment.status = data.status;
+    updateOptions = options;
+    return shipment;
   };
 
   const result = await shipmentService.recordShipmentEvent(7, {
@@ -252,6 +267,9 @@ test("recordShipmentEvent records only the next status and updates the shipment"
     address: "Spokane regional hub",
     eventDate: "2026-09-16T10:00:00.000Z",
   });
+  assert.strictEqual(findOptions.transaction, eventOptions.transaction);
+  assert.strictEqual(eventOptions.transaction, updateOptions.transaction);
+  assert.strictEqual(findOptions.lock, "UPDATE");
 });
 
 test("recordShipmentEvent rejects a status that skips the next step", async () => {
