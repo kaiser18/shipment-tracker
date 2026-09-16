@@ -20,11 +20,16 @@ export class Shipments implements OnInit {
   protected readonly displayedColumns = ['id', 'destination', 'status', 'promisedDate', 'details'];
   protected readonly shipments = signal<Shipment[]>([]);
   protected readonly selectedStatus = signal('all');
+  protected readonly delayedOnly = signal(false);
   protected readonly filteredShipments = computed(() => {
     const status = this.selectedStatus();
 
     return [...this.shipments()]
-      .filter((shipment) => status === 'all' || this.getDisplayStatus(shipment) === status)
+      .filter(
+        (shipment) =>
+          (this.delayedOnly() && this.isDelayed(shipment)) ||
+          (!this.delayedOnly() && (status === 'all' || shipment.status === status)),
+      )
       .sort((first, second) => {
         const firstDelayed = this.isDelayed(first) ? 1 : 0;
         const secondDelayed = this.isDelayed(second) ? 1 : 0;
@@ -51,7 +56,7 @@ export class Shipments implements OnInit {
 
   protected openShipment(shipment: Shipment): void {
     this.dialog.open(ShipmentDialog, {
-      data: { ...shipment, status: this.getDisplayStatus(shipment) },
+      data: shipment,
       width: 'min(92vw, 560px)',
       maxWidth: '100vw',
       autoFocus: 'dialog',
@@ -75,13 +80,15 @@ export class Shipments implements OnInit {
 
   protected setStatusFilter(status: string): void {
     this.selectedStatus.set(status);
+    this.delayedOnly.set(false);
   }
 
-  protected getDisplayStatus(shipment: Shipment): string {
-    return this.isDelayed(shipment) ? 'delayed' : shipment.status;
+  protected toggleDelayedOnly(): void {
+    this.delayedOnly.update((showDelayed) => !showDelayed);
+    this.selectedStatus.set('all');
   }
 
-  private isDelayed(shipment: Shipment): boolean {
+  protected isDelayed(shipment: Shipment): boolean {
     if (shipment.status.toLowerCase() === 'delivered') {
       return false;
     }

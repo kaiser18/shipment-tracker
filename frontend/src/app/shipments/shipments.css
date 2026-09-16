@@ -44,10 +44,20 @@ h1 {
 .table-toolbar {
   max-width: 1100px;
   margin: 0 auto 1rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
 }
 
 .table-toolbar mat-form-field {
   width: min(100%, 260px);
+}
+
+.delayed-toggle {
+  width: min(100%, 260px);
+  height: 56px;
+  color: #b3261e;
+  border-color: #b3261e;
 }
 
 .table-shell {
@@ -98,9 +108,26 @@ table {
   color: #8a5a00;
 }
 
+.status-at-hub,
+.status-out-for-delivery {
+  background: #e8e5f8;
+  color: #514493;
+}
+
 .status-delayed {
   background: #fde4e1;
   color: #a53a32;
+}
+
+.delayed-date {
+  color: #b3261e;
+  font-weight: 700;
+}
+
+.delayed-label {
+  margin-left: 0.5rem;
+  font-size: 0.75rem;
+  text-transform: uppercase;
 }
 
 .state-message {
@@ -115,6 +142,11 @@ table {
 }
 
 @media (max-width: 640px) {
+  .table-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
   .page-header {
     align-items: start;
     flex-direction: column;

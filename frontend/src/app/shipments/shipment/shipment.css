@@ -41,6 +41,17 @@ h2 {
   color: #8a5a00;
 }
 
+.delayed-date {
+  color: #b3261e;
+  font-weight: 700;
+}
+
+.delayed-label {
+  margin-left: 0.5rem;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+}
+
 .details-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

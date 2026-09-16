@@ -16,7 +16,12 @@
     </div>
     <div class="detail">
       <dt>Promised delivery</dt>
-      <dd>{{ shipment.promisedDate | date: 'MMMM d, y' }}</dd>
+      <dd [class.delayed-date]="isDelayed()">
+        {{ shipment.promisedDate | date: 'MMMM d, y' }}
+        @if (isDelayed()) {
+          <strong class="delayed-label">Delayed</strong>
+        }
+      </dd>
     </div>
     @if (shipment.userName || shipment.userSurname) {
       <div class="detail">
