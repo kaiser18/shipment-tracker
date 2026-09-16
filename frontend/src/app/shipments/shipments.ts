@@ -19,6 +19,13 @@ import { Shipments as ShipmentsService } from './service/shipments';
 export class Shipments implements OnInit {
   protected readonly displayedColumns = ['id', 'destination', 'status', 'promisedDate', 'details'];
   protected readonly shipments = signal<Shipment[]>([]);
+  protected readonly totalShipments = computed(() => this.shipments().length);
+  protected readonly delayedShipments = computed(
+    () => this.shipments().filter((shipment) => this.isDelayed(shipment)).length,
+  );
+  protected readonly deliveredShipments = computed(
+    () => this.shipments().filter((shipment) => shipment.status === 'delivered').length,
+  );
   protected readonly selectedStatus = signal('all');
   protected readonly delayedOnly = signal(false);
   protected readonly filteredShipments = computed(() => {

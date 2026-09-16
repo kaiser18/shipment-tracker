@@ -53,6 +53,12 @@ const seedDatabase = async () => {
         status: "out for delivery",
         userId: users[1].id,
       },
+      {
+        address: "17 Lakeview Drive, Chicago",
+        promisedDate: "2026-09-11",
+        status: "in transit",
+        userId: users[1].id,
+      },
     ],
     { returning: true },
   );
@@ -73,6 +79,7 @@ const seedDatabase = async () => {
   await shipments[3].addItems([items[0], items[2]]);
   await shipments[4].addItems([items[3]]);
   await shipments[5].addItems([items[1], items[3]]);
+  await shipments[6].addItems([items[0], items[2]]);
 
   const eventDefinitions = [
     [["pending", "2026-09-10", "Portland distribution center"]],
@@ -98,6 +105,10 @@ const seedDatabase = async () => {
       ["in transit", "2026-09-14", "Phoenix regional hub"],
       ["at hub", "2026-09-15", "Phoenix central hub"],
       ["out for delivery", "2026-09-16", "Phoenix local depot"],
+    ],
+    [
+      ["pending", "2026-09-07", "Chicago intake facility"],
+      ["in transit", "2026-09-08", "Chicago regional hub"],
     ],
   ];
 

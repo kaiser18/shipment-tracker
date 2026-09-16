@@ -35,10 +35,28 @@ h1 {
   color: #60727a;
 }
 
-.shipment-count {
-  color: #007c83;
+.shipment-summary {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.5rem 1rem;
+  color: #48606a;
+  font-size: 0.9rem;
   font-weight: 700;
-  white-space: nowrap;
+  text-transform: capitalize;
+}
+
+.shipment-summary strong {
+  color: #142b35;
+  font-size: 1.1rem;
+}
+
+.summary-delayed {
+  color: #b3261e;
+}
+
+.summary-delivered {
+  color: #216b43;
 }
 
 .table-toolbar {
@@ -46,16 +64,35 @@ h1 {
   margin: 0 auto 1rem;
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 1rem;
 }
 
-.table-toolbar mat-form-field {
-  width: min(100%, 260px);
+.toolbar-filters {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.status-filter {
+  width: 180px;
+  height: 40px;
+}
+
+.status-filter .mat-mdc-form-field-subscript-wrapper {
+  display: none;
+}
+
+.status-filter .mat-mdc-text-field-wrapper,
+.status-filter .mat-mdc-form-field-flex {
+  height: 40px;
 }
 
 .delayed-toggle {
-  width: min(100%, 260px);
-  height: 56px;
+  width: 200px;
+  min-height: 40px;
+  height: 40px;
+  padding: 0 0.75rem;
   color: #b3261e;
   border-color: #b3261e;
 }
@@ -145,6 +182,16 @@ table {
   .table-toolbar {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .toolbar-filters {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .status-filter,
+  .delayed-toggle {
+    width: 100%;
   }
 
   .page-header {

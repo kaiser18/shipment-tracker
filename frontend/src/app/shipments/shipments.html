@@ -2,9 +2,18 @@
   <header class="page-header">
     <div>
       <h1>Shipment Tracker</h1>
-      <button mat-raised-button type="button" (click)="openNewShipment()">New shipment</button>
     </div>
-    <span class="shipment-count">{{ filteredShipments().length }} total</span>
+    <div class="shipment-summary" aria-label="Shipment summary">
+      <span
+        ><strong>{{ totalShipments() }}</strong> total</span
+      >
+      <span class="summary-delayed"
+        ><strong>{{ delayedShipments() }}</strong> delayed</span
+      >
+      <span class="summary-delivered"
+        ><strong>{{ deliveredShipments() }}</strong> delivered</span
+      >
+    </div>
   </header>
 
   @if (isLoading()) {
@@ -15,20 +24,28 @@
     <p class="state-message">No shipments found.</p>
   } @else {
     <div class="table-toolbar">
-      <mat-form-field appearance="outline">
-        <mat-label>Filter by status</mat-label>
-        <mat-select [value]="selectedStatus()" (selectionChange)="setStatusFilter($event.value)">
-          <mat-option value="all">All statuses</mat-option>
-          <mat-option value="pending">Pending</mat-option>
-          <mat-option value="in transit">In transit</mat-option>
-          <mat-option value="at hub">At hub</mat-option>
-          <mat-option value="out for delivery">Out for delivery</mat-option>
-          <mat-option value="delivered">Delivered</mat-option>
-        </mat-select>
-      </mat-form-field>
-      <button mat-stroked-button class="delayed-toggle" type="button" (click)="toggleDelayedOnly()">
-        {{ delayedOnly() ? 'Show all shipments' : 'Show delayed shipments' }}
-      </button>
+      <div class="toolbar-filters">
+        <mat-form-field appearance="outline" class="status-filter">
+          <mat-label>Filter by status</mat-label>
+          <mat-select [value]="selectedStatus()" (selectionChange)="setStatusFilter($event.value)">
+            <mat-option value="all">All statuses</mat-option>
+            <mat-option value="pending">Pending</mat-option>
+            <mat-option value="in transit">In transit</mat-option>
+            <mat-option value="at hub">At hub</mat-option>
+            <mat-option value="out for delivery">Out for delivery</mat-option>
+            <mat-option value="delivered">Delivered</mat-option>
+          </mat-select>
+        </mat-form-field>
+        <button
+          mat-stroked-button
+          class="delayed-toggle"
+          type="button"
+          (click)="toggleDelayedOnly()"
+        >
+          {{ delayedOnly() ? 'Show all shipments' : 'Show delayed shipments' }}
+        </button>
+      </div>
+      <button mat-raised-button type="button" (click)="openNewShipment()">New shipment</button>
     </div>
     @if (filteredShipments().length === 0) {
       <p class="state-message">No shipments match this status.</p>
@@ -58,7 +75,7 @@
             <th mat-header-cell *matHeaderCellDef>Estimated delivery</th>
             <td mat-cell *matCellDef="let shipment">
               <span [class.delayed-date]="isDelayed(shipment)">
-                {{ shipment.promisedDate | date: 'MMM d, y' }}
+                {{ shipment.promisedDate | date: 'MMM d, y, h:mm a' }}
                 @if (isDelayed(shipment)) {
                   <strong class="delayed-label">Delayed</strong>
                 }
