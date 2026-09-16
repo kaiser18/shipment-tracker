@@ -70,6 +70,35 @@ test("createShipment delegates to Shipment.create", async () => {
   assert.strictEqual(receivedData, shipmentData);
 });
 
+test("createShipment associates selected items", async () => {
+  const shipment = { addItems: async () => undefined };
+  const shipmentData = {
+    address: "12 Main Street",
+    promisedDate: "2026-09-20",
+    userId: 1,
+    itemIds: [2, 3],
+  };
+  let receivedData;
+  let receivedItems;
+  Shipment.create = async (data) => {
+    receivedData = data;
+    return shipment;
+  };
+  shipment.addItems = async (items) => {
+    receivedItems = items;
+  };
+
+  const result = await shipmentService.createShipment(shipmentData);
+
+  assert.strictEqual(result, shipment);
+  assert.deepStrictEqual(receivedData, {
+    address: "12 Main Street",
+    promisedDate: "2026-09-20",
+    userId: 1,
+  });
+  assert.deepStrictEqual(receivedItems, [2, 3]);
+});
+
 test("getShipments applies status, pagination, and descending status order", async () => {
   const shipments = [{ id: 2, status: "pending" }];
   let options;

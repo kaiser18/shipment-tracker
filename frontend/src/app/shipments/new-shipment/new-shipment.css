@@ -1,0 +1,22 @@
+.form-content {
+  display: grid;
+  gap: 0.75rem;
+  min-width: min(78vw, 480px);
+}
+
+.error-message {
+  margin: 0;
+  color: #a53a32;
+}
+
+.date-note {
+  margin: 0;
+  color: #60727a;
+  font-size: 0.85rem;
+}
+
+@media (max-width: 520px) {
+  .form-content {
+    min-width: 0;
+  }
+}

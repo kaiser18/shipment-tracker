@@ -9,7 +9,13 @@ export interface Shipment {
 }
 
 export interface ShipmentItem {
-  id: string;
+  id: number;
   name: string;
   quantity: number;
+}
+
+export interface ShipmentUser {
+  id: number;
+  name: string;
+  surname: string;
 }

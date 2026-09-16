@@ -3,7 +3,18 @@ const User = require("../user/model");
 const Item = Shipment.Item;
 
 exports.createShipment = async (shipmentData) => {
-  return await Shipment.create(shipmentData);
+  if (!shipmentData.itemIds) {
+    return await Shipment.create(shipmentData);
+  }
+
+  const { itemIds = [], ...shipmentFields } = shipmentData;
+  const shipment = await Shipment.create(shipmentFields);
+
+  if (itemIds.length > 0) {
+    await shipment.addItems(itemIds);
+  }
+
+  return shipment;
 };
 
 exports.getShipments = (query) => {

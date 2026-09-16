@@ -1,1 +1,51 @@
-<p>new-shipment works!</p>
+<h2 mat-dialog-title>New shipment</h2>
+
+@if (isLoading()) {
+  <mat-dialog-content>Loading users and items...</mat-dialog-content>
+} @else {
+  <form [formGroup]="form" (ngSubmit)="submit()">
+    <mat-dialog-content class="form-content">
+      @if (errorMessage()) {
+        <p class="error-message" role="alert">{{ errorMessage() }}</p>
+      }
+
+      <mat-form-field appearance="outline">
+        <mat-label>Address</mat-label>
+        <input matInput formControlName="address" autocomplete="street-address" />
+        @if (form.controls.address.hasError('required')) {
+          <mat-error>Address is required.</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>User</mat-label>
+        <mat-select formControlName="userId">
+          @for (user of users(); track user.id) {
+            <mat-option [value]="user.id">{{ user.name }} {{ user.surname }}</mat-option>
+          }
+        </mat-select>
+        @if (form.controls.userId.hasError('required')) {
+          <mat-error>User is required.</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Items</mat-label>
+        <mat-select formControlName="itemIds" multiple>
+          @for (item of items(); track item.id) {
+            <mat-option [value]="item.id">{{ item.name }} ({{ item.quantity }})</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <p class="date-note">Promised delivery: 3 working days from submission.</p>
+    </mat-dialog-content>
+
+    <mat-dialog-actions align="end">
+      <button mat-button type="button" mat-dialog-close>Cancel</button>
+      <button mat-flat-button type="submit" [disabled]="isSubmitting()">
+        {{ isSubmitting() ? 'Creating...' : 'Create shipment' }}
+      </button>
+    </mat-dialog-actions>
+  </form>
+}

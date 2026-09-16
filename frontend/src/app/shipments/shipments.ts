@@ -4,6 +4,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { MatTableModule } from '@angular/material/table';
 import { Shipment } from './model/shipment';
+import { NewShipment } from './new-shipment/new-shipment';
 import { Shipment as ShipmentDialog } from './shipment/shipment';
 import { Shipments as ShipmentsService } from './service/shipments';
 
@@ -40,6 +41,21 @@ export class Shipments implements OnInit {
       width: 'min(92vw, 560px)',
       maxWidth: '100vw',
       autoFocus: 'dialog',
+    });
+  }
+
+  protected openNewShipment(): void {
+    const dialogRef = this.dialog.open(NewShipment, {
+      width: 'min(92vw, 620px)',
+      maxWidth: '100vw',
+    });
+
+    dialogRef.afterClosed().subscribe((created: boolean) => {
+      if (created) {
+        this.shipmentsService.getShipments().subscribe({
+          next: (shipments) => this.shipments.set(shipments),
+        });
+      }
     });
   }
 }
