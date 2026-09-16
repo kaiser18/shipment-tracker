@@ -12,11 +12,6 @@ router.route("/items").get(shipmentController.getItems);
 
 router.route("/:id/events").post(shipmentController.recordShipmentEvent);
 
-router
-  .route("/:id")
-  .get(shipmentController.getShipmentById)
-  .put(shipmentController.updateShipment)
-  .patch(shipmentController.updateShipment)
-  .delete(shipmentController.deleteShipment);
+router.route("/:id").get(shipmentController.getShipmentById);
 
 module.exports = router;

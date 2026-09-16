@@ -280,36 +280,6 @@ test("recordShipmentEvent rejects events after delivery", async () => {
   );
 });
 
-test("updateShipment records an event when the status changes", async () => {
-  const shipment = {
-    id: 4,
-    status: "at hub",
-    update: async (data) => {
-      shipment.status = data.status;
-      return shipment;
-    },
-  };
-  let eventData;
-  Shipment.findByPk = async () => shipment;
-  Shipment.Event.create = async (data) => {
-    eventData = data;
-    return data;
-  };
-
-  await shipmentService.updateShipment(4, {
-    status: "out for delivery",
-    eventAddress: "Local delivery depot",
-  });
-
-  assert.deepStrictEqual(eventData, {
-    shipmentId: 4,
-    status: "out for delivery",
-    address: "Local delivery depot",
-    eventDate: eventData.eventDate,
-  });
-  assert.ok(eventData.eventDate instanceof Date);
-});
-
 test("getItems delegates to Item.findAll", async () => {
   const items = [{ id: 1, name: "Wireless headphones", quantity: 1 }];
   let called = false;
@@ -322,60 +292,4 @@ test("getItems delegates to Item.findAll", async () => {
 
   assert.strictEqual(result, items);
   assert.strictEqual(called, true);
-});
-
-test("updateShipment updates an existing shipment", async () => {
-  const shipment = { update: async () => undefined };
-  const shipmentData = { status: "delivered" };
-  let receivedId;
-  let receivedData;
-  Shipment.findByPk = async (id) => {
-    receivedId = id;
-    return shipment;
-  };
-  shipment.update = async (data) => {
-    receivedData = data;
-    return { ...shipment, ...data };
-  };
-
-  const result = await shipmentService.updateShipment(4, shipmentData);
-
-  assert.deepStrictEqual(result, {
-    update: shipment.update,
-    status: "delivered",
-  });
-  assert.strictEqual(receivedId, 4);
-  assert.strictEqual(receivedData, shipmentData);
-});
-
-test("updateShipment throws when the shipment does not exist", async () => {
-  Shipment.findByPk = async () => null;
-
-  await assert.rejects(
-    shipmentService.updateShipment(99, { status: "delivered" }),
-    { message: "Shipment not found" },
-  );
-});
-
-test("deleteShipment destroys an existing shipment", async () => {
-  let destroyed = false;
-  const shipment = {
-    destroy: async () => {
-      destroyed = true;
-    },
-  };
-  Shipment.findByPk = async () => shipment;
-
-  const result = await shipmentService.deleteShipment(5);
-
-  assert.strictEqual(result, undefined);
-  assert.strictEqual(destroyed, true);
-});
-
-test("deleteShipment throws when the shipment does not exist", async () => {
-  Shipment.findByPk = async () => null;
-
-  await assert.rejects(shipmentService.deleteShipment(99), {
-    message: "Shipment not found",
-  });
 });

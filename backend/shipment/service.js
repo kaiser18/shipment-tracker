@@ -94,34 +94,3 @@ exports.recordShipmentEvent = async (id, eventData) => {
   await shipment.update({ status: nextStatus });
   return event;
 };
-
-exports.updateShipment = async (id, shipmentData) => {
-  const shipment = await Shipment.findByPk(id);
-  if (!shipment) {
-    throw new Error("Shipment not found");
-  }
-  const previousStatus = shipment.status;
-  const { eventAddress, ...shipmentFields } = shipmentData;
-  const updatedShipment = await shipment.update(
-    eventAddress === undefined ? shipmentData : shipmentFields,
-  );
-
-  if (shipmentData.status && shipmentData.status !== previousStatus) {
-    await Event.create({
-      shipmentId: shipment.id,
-      status: shipmentData.status,
-      eventDate: new Date(),
-      address: eventAddress ?? "Shipment facility",
-    });
-  }
-
-  return updatedShipment;
-};
-
-exports.deleteShipment = async (id) => {
-  const shipment = await Shipment.findByPk(id);
-  if (!shipment) {
-    throw new Error("Shipment not found");
-  }
-  return await shipment.destroy();
-};
