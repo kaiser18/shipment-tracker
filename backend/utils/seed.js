@@ -40,6 +40,12 @@ const seedDatabase = async () => {
         status: "pending",
         userId: users[1].id,
       },
+      {
+        address: "29 River Road, Austin",
+        promisedDate: "2026-09-12",
+        status: "pending",
+        userId: users[0].id,
+      },
     ],
     { returning: true },
   );
@@ -58,6 +64,7 @@ const seedDatabase = async () => {
   await shipments[1].addItems([items[1], items[2]]);
   await shipments[2].addItems([items[3]]);
   await shipments[3].addItems([items[0], items[2]]);
+  await shipments[4].addItems([items[3]]);
 
   console.log("Dummy users and shipments created successfully.");
 };

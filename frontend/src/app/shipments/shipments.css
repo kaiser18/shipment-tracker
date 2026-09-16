@@ -41,6 +41,15 @@ h1 {
   white-space: nowrap;
 }
 
+.table-toolbar {
+  max-width: 1100px;
+  margin: 0 auto 1rem;
+}
+
+.table-toolbar mat-form-field {
+  width: min(100%, 260px);
+}
+
 .table-shell {
   max-width: 1100px;
   margin: 0 auto;
@@ -87,6 +96,11 @@ table {
 .status-in-transit {
   background: #fff1d8;
   color: #8a5a00;
+}
+
+.status-delayed {
+  background: #fde4e1;
+  color: #a53a32;
 }
 
 .state-message {
