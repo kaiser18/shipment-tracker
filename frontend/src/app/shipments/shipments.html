@@ -26,7 +26,6 @@
     <div class="table-toolbar">
       <div class="toolbar-filters">
         <mat-form-field appearance="outline" class="status-filter">
-          <mat-label>Filter by status</mat-label>
           <mat-select [value]="selectedStatus()" (selectionChange)="setStatusFilter($event.value)">
             <mat-option value="all">All statuses</mat-option>
             <mat-option value="pending">Pending</mat-option>
