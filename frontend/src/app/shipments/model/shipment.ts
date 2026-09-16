@@ -4,7 +4,8 @@ export interface Shipment {
   status: string;
   promisedDate: string;
   items?: ShipmentItem[];
-  customerId?: number;
+  userName?: string;
+  userSurname?: string;
 }
 
 export interface ShipmentItem {

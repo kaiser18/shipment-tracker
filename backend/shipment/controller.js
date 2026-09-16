@@ -1,5 +1,18 @@
 const shipmentService = require("./service");
 
+const serializeShipment = (shipment) => {
+  const data = shipment.toJSON ? shipment.toJSON() : shipment;
+  const user = data.user ?? {};
+
+  return {
+    ...data,
+    destination: data.destination ?? data.address ?? "",
+    userName: data.userName ?? user.name ?? "",
+    userSurname: data.userSurname ?? user.surname ?? "",
+    items: data.items ?? [],
+  };
+};
+
 exports.addShipment = async (req, res, next) => {
   try {
     const shipmentData = req.body;
@@ -25,7 +38,7 @@ exports.getShipments = async (req, res, next) => {
     res.status(200).json({
       status: "success",
       data: {
-        shipments,
+        shipments: shipments.map(serializeShipment),
       },
     });
   } catch (err) {
@@ -48,7 +61,7 @@ exports.getShipmentById = async (req, res, next) => {
     res.status(200).json({
       status: "success",
       data: {
-        shipment,
+        shipment: serializeShipment(shipment),
       },
     });
   } catch (err) {

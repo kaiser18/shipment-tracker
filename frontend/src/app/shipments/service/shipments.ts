@@ -5,12 +5,7 @@ import { Shipment } from '../model/shipment';
 
 interface ShipmentsResponse {
   data: {
-    shipments: Array<{
-      id: number;
-      address: string;
-      promisedDate: string;
-      status: string;
-    }>;
+    shipments: Array<Shipment & { address?: string }>;
   };
 }
 
@@ -23,9 +18,12 @@ export class Shipments {
       map((response) =>
         response.data.shipments.map((shipment) => ({
           id: shipment.id,
-          destination: shipment.address,
+          destination: shipment.destination ?? shipment.address ?? '',
           status: shipment.status,
           promisedDate: shipment.promisedDate,
+          userName: shipment.userName ?? '',
+          userSurname: shipment.userSurname ?? '',
+          items: shipment.items ?? [],
         })),
       ),
     );

@@ -1,1 +1,46 @@
-<p>shipment works!</p>
+<header mat-dialog-title class="dialog-header">
+  <div>
+    <p class="eyebrow">Shipment details</p>
+    <h2>Shipment #{{ shipment.id }}</h2>
+  </div>
+  <span class="status" [class]="'status-' + shipment.status.replace(' ', '-')">
+    {{ shipment.status }}
+  </span>
+</header>
+
+<mat-dialog-content>
+  <dl class="details-grid">
+    <div class="detail">
+      <dt>Destination</dt>
+      <dd>{{ shipment.destination }}</dd>
+    </div>
+    <div class="detail">
+      <dt>Promised delivery</dt>
+      <dd>{{ shipment.promisedDate | date: 'MMMM d, y' }}</dd>
+    </div>
+    @if (shipment.userName || shipment.userSurname) {
+      <div class="detail">
+        <dt>User</dt>
+        <dd>{{ shipment.userName }} {{ shipment.userSurname }}</dd>
+      </div>
+    }
+  </dl>
+
+  @if (shipment.items?.length) {
+    <section class="items-section" aria-labelledby="items-heading">
+      <h3 id="items-heading">Items</h3>
+      <ul class="items-list">
+        @for (item of shipment.items; track item.id) {
+          <li>
+            <span>{{ item.name }}</span>
+            <strong>Qty {{ item.quantity }}</strong>
+          </li>
+        }
+      </ul>
+    </section>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>Close</button>
+</mat-dialog-actions>

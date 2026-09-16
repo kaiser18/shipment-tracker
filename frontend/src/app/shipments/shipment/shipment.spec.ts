@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { Shipment } from './shipment';
 
 describe('Shipment', () => {
@@ -8,6 +9,17 @@ describe('Shipment', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [Shipment],
+      providers: [
+        {
+          provide: MAT_DIALOG_DATA,
+          useValue: {
+            id: 1,
+            destination: '12 Oak Avenue, Portland',
+            status: 'pending',
+            promisedDate: '2026-09-18',
+          },
+        },
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(Shipment);

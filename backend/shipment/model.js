@@ -36,7 +36,10 @@ const Shipment = sequelize.define(
   },
 );
 
-Shipment.belongsTo(require("../user/model"), { foreignKey: "userId" });
+Shipment.belongsTo(require("../user/model"), {
+  as: "user",
+  foreignKey: "userId",
+});
 
 const Item = sequelize.define("Item", {
   id: {
@@ -55,8 +58,8 @@ const Item = sequelize.define("Item", {
   },
 });
 
-Shipment.belongsToMany(Item, { through: "ShipmentItems" });
-Item.belongsToMany(Shipment, { through: "ShipmentItems" });
+Shipment.belongsToMany(Item, { as: "items", through: "ShipmentItems" });
+Item.belongsToMany(Shipment, { as: "shipments", through: "ShipmentItems" });
 
 module.exports = Shipment;
 module.exports.Item = Item;

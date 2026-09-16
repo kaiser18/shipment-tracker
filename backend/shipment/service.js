@@ -1,4 +1,5 @@
 const Shipment = require("./model");
+const User = require("../user/model");
 const Item = Shipment.Item;
 
 exports.createShipment = async (shipmentData) => {
@@ -16,11 +17,20 @@ exports.getShipments = (query) => {
     limit,
     offset,
     order: [["status", "DESC"]],
+    include: [
+      { model: Item, as: "items" },
+      { model: User, as: "user" },
+    ],
   });
 };
 
 exports.getShipmentById = (id) => {
-  return Shipment.findByPk(id);
+  return Shipment.findByPk(id, {
+    include: [
+      { model: Item, as: "items" },
+      { model: User, as: "user" },
+    ],
+  });
 };
 
 exports.getItems = () => {

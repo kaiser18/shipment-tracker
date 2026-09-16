@@ -2,10 +2,13 @@ const assert = require("node:assert/strict");
 const test = require("node:test");
 
 const modelPath = require.resolve("./model");
+const userModelPath = require.resolve("../user/model");
 const servicePath = require.resolve("./service");
 const originalModelModule = require.cache[modelPath];
+const originalUserModelModule = require.cache[userModelPath];
 
 let Shipment;
+let User;
 let shipmentService;
 
 test.beforeEach(() => {
@@ -17,12 +20,19 @@ test.beforeEach(() => {
   Shipment.Item = {
     findAll: async () => [],
   };
+  User = {};
 
   require.cache[modelPath] = {
     id: modelPath,
     filename: modelPath,
     loaded: true,
     exports: Shipment,
+  };
+  require.cache[userModelPath] = {
+    id: userModelPath,
+    filename: userModelPath,
+    loaded: true,
+    exports: User,
   };
   delete require.cache[servicePath];
   shipmentService = require("./service");
@@ -34,6 +44,11 @@ test.after(() => {
     require.cache[modelPath] = originalModelModule;
   } else {
     delete require.cache[modelPath];
+  }
+  if (originalUserModelModule) {
+    require.cache[userModelPath] = originalUserModelModule;
+  } else {
+    delete require.cache[userModelPath];
   }
 });
 
@@ -75,6 +90,10 @@ test("getShipments applies status, pagination, and descending status order", asy
     limit: 5,
     offset: 10,
     order: [["status", "DESC"]],
+    include: [
+      { model: Shipment.Item, as: "items" },
+      { model: User, as: "user" },
+    ],
   });
 });
 
@@ -92,14 +111,20 @@ test("getShipments uses defaults and an empty filter when no status is provided"
     limit: 10,
     offset: 0,
     order: [["status", "DESC"]],
+    include: [
+      { model: Shipment.Item, as: "items" },
+      { model: User, as: "user" },
+    ],
   });
 });
 
 test("getShipmentById delegates to Shipment.findByPk", async () => {
   const shipment = { id: 7 };
   let receivedId;
-  Shipment.findByPk = async (id) => {
+  let receivedOptions;
+  Shipment.findByPk = async (id, options) => {
     receivedId = id;
+    receivedOptions = options;
     return shipment;
   };
 
@@ -107,6 +132,12 @@ test("getShipmentById delegates to Shipment.findByPk", async () => {
 
   assert.strictEqual(result, shipment);
   assert.strictEqual(receivedId, 7);
+  assert.deepStrictEqual(receivedOptions, {
+    include: [
+      { model: Shipment.Item, as: "items" },
+      { model: User, as: "user" },
+    ],
+  });
 });
 
 test("getItems delegates to Item.findAll", async () => {
