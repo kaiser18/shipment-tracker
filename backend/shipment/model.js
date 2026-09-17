@@ -9,7 +9,7 @@ const Shipment = sequelize.define(
       allowNull: false,
       autoIncrement: true,
     },
-    address: {
+    destination: {
       type: DataTypes.STRING(255),
       allowNull: false,
     },

@@ -4,9 +4,11 @@ import { map, Observable } from 'rxjs';
 import { Shipment, ShipmentEvent } from '../model/shipment';
 import { ShipmentItem, ShipmentUser } from '../model/shipment';
 
+const API_BASE_URL = 'http://localhost:3000';
+
 interface ShipmentsResponse {
   data: {
-    shipments: Array<Shipment & { address?: string }>;
+    shipments: Shipment[];
   };
 }
 
@@ -15,42 +17,31 @@ export class Shipments {
   private readonly http = inject(HttpClient);
 
   getShipments(): Observable<Shipment[]> {
-    return this.http.get<ShipmentsResponse>('http://localhost:3000/shipments?limit=1000').pipe(
-      map((response) =>
-        response.data.shipments.map((shipment) => ({
-          id: shipment.id,
-          destination: shipment.destination ?? shipment.address ?? '',
-          status: shipment.status,
-          promisedDate: shipment.promisedDate,
-          userName: shipment.userName ?? '',
-          userSurname: shipment.userSurname ?? '',
-          items: shipment.items ?? [],
-          events: shipment.events ?? [],
-        })),
-      ),
-    );
+    return this.http
+      .get<ShipmentsResponse>(`${API_BASE_URL}/shipments?limit=1000`)
+      .pipe(map((response) => response.data.shipments));
   }
 
   getUsers(): Observable<ShipmentUser[]> {
     return this.http
-      .get<{ data: { users: ShipmentUser[] } }>('http://localhost:3000/users')
+      .get<{ data: { users: ShipmentUser[] } }>(`${API_BASE_URL}/users`)
       .pipe(map((response) => response.data.users));
   }
 
   getItems(): Observable<ShipmentItem[]> {
     return this.http
-      .get<{ data: { items: ShipmentItem[] } }>('http://localhost:3000/shipments/items')
+      .get<{ data: { items: ShipmentItem[] } }>(`${API_BASE_URL}/shipments/items`)
       .pipe(map((response) => response.data.items));
   }
 
   createShipment(payload: {
-    address: string;
+    destination: string;
     promisedDate: string;
     userId: number;
     itemIds: number[];
   }): Observable<Shipment> {
     return this.http
-      .post<{ data: { newShipment: Shipment } }>('http://localhost:3000/shipments', payload)
+      .post<{ data: { newShipment: Shipment } }>(`${API_BASE_URL}/shipments`, payload)
       .pipe(map((response) => response.data.newShipment));
   }
 
@@ -60,7 +51,7 @@ export class Shipments {
   ): Observable<ShipmentEvent> {
     return this.http
       .post<{ data: { event: ShipmentEvent } }>(
-        `http://localhost:3000/shipments/${shipmentId}/events`,
+        `${API_BASE_URL}/shipments/${shipmentId}/events`,
         payload,
       )
       .pipe(map((response) => response.data.event));

@@ -6,7 +6,7 @@ const serializeShipment = (shipment) => {
 
   return {
     ...data,
-    destination: data.destination ?? data.address ?? "",
+    destination: data.destination ?? "",
     userName: data.userName ?? user.name ?? "",
     userSurname: data.userSurname ?? user.surname ?? "",
     items: data.items ?? [],

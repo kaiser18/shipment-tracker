@@ -10,10 +10,10 @@
       }
 
       <mat-form-field appearance="outline">
-        <mat-label>Address</mat-label>
-        <input matInput formControlName="address" autocomplete="street-address" />
-        @if (form.controls.address.hasError('required')) {
-          <mat-error>Address is required.</mat-error>
+        <mat-label>Destination</mat-label>
+        <input matInput formControlName="destination" autocomplete="street-address" />
+        @if (form.controls.destination.hasError('required')) {
+          <mat-error>Destination is required.</mat-error>
         }
       </mat-form-field>
 

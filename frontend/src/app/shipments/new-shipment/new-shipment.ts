@@ -29,7 +29,7 @@ export class NewShipment implements OnInit {
   protected readonly isSubmitting = signal(false);
   protected readonly errorMessage = signal('');
   protected readonly form = inject(FormBuilder).group({
-    address: ['', [Validators.required, Validators.maxLength(255)]],
+    destination: ['', [Validators.required, Validators.maxLength(255)]],
     userId: [null as number | null, Validators.required],
     itemIds: [[] as number[]],
   });
@@ -63,7 +63,7 @@ export class NewShipment implements OnInit {
     this.isSubmitting.set(true);
     this.shipmentsService
       .createShipment({
-        address: value.address ?? '',
+        destination: value.destination ?? '',
         promisedDate: this.getPromisedDate(),
         userId: value.userId as number,
         itemIds: value.itemIds ?? [],

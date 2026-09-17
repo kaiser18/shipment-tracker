@@ -11,6 +11,38 @@ import { NewShipment } from './new-shipment/new-shipment';
 import { Shipment as ShipmentDialog } from './shipment/shipment';
 import { Shipments as ShipmentsService } from './service/shipments';
 
+function getShipmentPriority(shipment: Shipment): number {
+  if (isShipmentDelayed(shipment)) return 2;
+  if (shipment.status === 'delivered') return 0;
+  return 1;
+}
+
+export function isShipmentDelayed(shipment: Pick<Shipment, 'status' | 'promisedDate'>): boolean {
+  if (shipment.status === 'delivered') {
+    return false;
+  }
+
+  const promisedDate = new Date(shipment.promisedDate);
+
+  if (Number.isNaN(promisedDate.getTime())) {
+    return false;
+  }
+
+  return promisedDate < new Date();
+}
+
+export function matchesShipmentFilter(
+  shipment: Pick<Shipment, 'status' | 'promisedDate'>,
+  selectedStatus: string,
+  delayedOnly: boolean,
+): boolean {
+  if (delayedOnly) {
+    return isShipmentDelayed(shipment);
+  }
+
+  return selectedStatus === 'all' || shipment.status === selectedStatus;
+}
+
 @Component({
   imports: [
     DatePipe,
@@ -29,7 +61,7 @@ export class Shipments implements OnInit {
   protected readonly shipments = signal<Shipment[]>([]);
   protected readonly totalShipments = computed(() => this.shipments().length);
   protected readonly delayedShipments = computed(
-    () => this.shipments().filter((shipment) => this.isDelayed(shipment)).length,
+    () => this.shipments().filter((shipment) => isShipmentDelayed(shipment)).length,
   );
   protected readonly deliveredShipments = computed(
     () => this.shipments().filter((shipment) => shipment.status === 'delivered').length,
@@ -41,22 +73,11 @@ export class Shipments implements OnInit {
   protected readonly pageSizeOptions = [5, 10, 25];
   protected readonly filteredShipments = computed(() => {
     const status = this.selectedStatus();
+    const delayedOnly = this.delayedOnly();
 
     return [...this.shipments()]
-      .filter(
-        (shipment) =>
-          (this.delayedOnly() && this.isDelayed(shipment)) ||
-          (!this.delayedOnly() && (status === 'all' || shipment.status === status)),
-      )
-      .sort((first, second) => {
-        const getPriority = (shipment: Shipment): number => {
-          if (this.isDelayed(shipment)) return 2;
-          if (shipment.status === 'delivered') return 0;
-          return 1;
-        };
-
-        return getPriority(second) - getPriority(first);
-      });
+      .filter((shipment) => matchesShipmentFilter(shipment, status, delayedOnly))
+      .sort((first, second) => getShipmentPriority(second) - getShipmentPriority(first));
   });
   protected readonly paginatedShipments = computed(() => {
     const start = this.pageIndex() * this.pageSize();
@@ -68,16 +89,7 @@ export class Shipments implements OnInit {
   private readonly dialog = inject(MatDialog);
 
   ngOnInit(): void {
-    this.shipmentsService.getShipments().subscribe({
-      next: (shipments) => {
-        this.shipments.set(shipments);
-        this.isLoading.set(false);
-      },
-      error: () => {
-        this.errorMessage.set('Unable to load shipments.');
-        this.isLoading.set(false);
-      },
-    });
+    this.loadShipments();
   }
 
   protected openShipment(shipment: Shipment): void {
@@ -90,9 +102,7 @@ export class Shipments implements OnInit {
 
     dialogRef.afterClosed().subscribe((updated: boolean) => {
       if (updated) {
-        this.shipmentsService.getShipments().subscribe({
-          next: (shipments) => this.shipments.set(shipments),
-        });
+        this.loadShipments();
       }
     });
   }
@@ -105,9 +115,7 @@ export class Shipments implements OnInit {
 
     dialogRef.afterClosed().subscribe((created: boolean) => {
       if (created) {
-        this.shipmentsService.getShipments().subscribe({
-          next: (shipments) => this.shipments.set(shipments),
-        });
+        this.loadShipments();
       }
     });
   }
@@ -130,12 +138,19 @@ export class Shipments implements OnInit {
   }
 
   protected isDelayed(shipment: Shipment): boolean {
-    if (shipment.status.toLowerCase() === 'delivered') {
-      return false;
-    }
+    return isShipmentDelayed(shipment);
+  }
 
-    const promisedDate = new Date(shipment.promisedDate);
-    const today = new Date();
-    return promisedDate < today;
+  private loadShipments(): void {
+    this.shipmentsService.getShipments().subscribe({
+      next: (shipments) => {
+        this.shipments.set(shipments);
+        this.isLoading.set(false);
+      },
+      error: () => {
+        this.errorMessage.set('Unable to load shipments.');
+        this.isLoading.set(false);
+      },
+    });
   }
 }
