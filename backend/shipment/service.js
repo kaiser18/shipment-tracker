@@ -11,6 +11,29 @@ const statusSequence = [
   "delivered",
 ];
 
+function getNextShipmentStatus(currentStatus) {
+  const currentIndex = statusSequence.indexOf(currentStatus);
+  return currentIndex === -1 ? null : (
+      (statusSequence[currentIndex + 1] ?? null)
+    );
+}
+
+function assertValidShipmentStatusTransition(currentStatus, nextStatus) {
+  const expectedStatus = getNextShipmentStatus(currentStatus);
+
+  if (!expectedStatus) {
+    throw new Error("Next shipment status must be none");
+  }
+
+  if (nextStatus !== expectedStatus) {
+    throw new Error(`Next shipment status must be ${expectedStatus}`);
+  }
+}
+
+exports.getNextShipmentStatus = getNextShipmentStatus;
+exports.assertValidShipmentStatusTransition =
+  assertValidShipmentStatusTransition;
+
 exports.createShipment = async (shipmentData) => {
   const { itemIds = [], eventAddress, ...shipmentFields } = shipmentData;
   const shipment = await Shipment.create(shipmentFields);
@@ -79,16 +102,13 @@ exports.recordShipmentEvent = async (id, eventData) => {
       lock: transaction.LOCK.UPDATE,
       transaction,
     });
+
     if (!shipment) {
       throw new Error("Shipment not found");
     }
 
-    const currentStatus = shipment.status;
-    const nextStatus =
-      statusSequence[statusSequence.indexOf(currentStatus) + 1];
-    if (!nextStatus || eventData.status !== nextStatus) {
-      throw new Error(`Next shipment status must be ${nextStatus ?? "none"}`);
-    }
+    const nextStatus = getNextShipmentStatus(shipment.status);
+    assertValidShipmentStatusTransition(shipment.status, eventData.status);
 
     const event = await Event.create(
       {
@@ -99,6 +119,7 @@ exports.recordShipmentEvent = async (id, eventData) => {
       },
       { transaction },
     );
+
     await shipment.update({ status: nextStatus }, { transaction });
     return event;
   });

@@ -8,6 +8,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { Shipment as ShipmentModel } from '../model/shipment';
 import { Shipments as ShipmentsService } from '../service/shipments';
+import { toLocalDateTimeInput } from '../utils/date';
 
 @Component({
   imports: [
@@ -41,7 +42,7 @@ export class Shipment {
   protected readonly eventForm = inject(FormBuilder).group({
     status: ['', Validators.required],
     address: ['', [Validators.required, Validators.maxLength(255)]],
-    eventDate: [this.getCurrentDateTime(), Validators.required],
+    eventDate: [toLocalDateTimeInput(), Validators.required],
   });
   private readonly shipmentsService = inject(ShipmentsService);
   private readonly dialogRef = inject(MatDialogRef<Shipment>);
@@ -96,9 +97,4 @@ export class Shipment {
       });
   }
 
-  private getCurrentDateTime(): string {
-    const date = new Date();
-    const offset = date.getTimezoneOffset() * 60000;
-    return new Date(date.getTime() - offset).toISOString().slice(0, 16);
-  }
 }

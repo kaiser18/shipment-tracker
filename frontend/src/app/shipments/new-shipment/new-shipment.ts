@@ -8,6 +8,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { ShipmentItem, ShipmentUser } from '../model/shipment';
 import { Shipments } from '../service/shipments';
+import { getShipmentPromisedDate } from '../utils/date';
 
 @Component({
   imports: [
@@ -78,19 +79,6 @@ export class NewShipment implements OnInit {
   }
 
   private getPromisedDate(): string {
-    const date = new Date();
-    let workingDays = 0;
-
-    while (workingDays < 3) {
-      date.setDate(date.getDate() + 1);
-      const day = date.getDay();
-      if (day !== 0 && day !== 6) {
-        workingDays += 1;
-      }
-    }
-
-    date.setHours(17, 0, 0, 0);
-    const offset = date.getTimezoneOffset() * 60000;
-    return new Date(date.getTime() - offset).toISOString().slice(0, 16);
+    return getShipmentPromisedDate();
   }
 }

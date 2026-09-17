@@ -1,4 +1,5 @@
 const shipmentService = require("./service");
+const { respondWithError } = require("../utils/response");
 
 const serializeShipment = (shipment) => {
   const data = shipment.toJSON ? shipment.toJSON() : shipment;
@@ -26,10 +27,7 @@ exports.addShipment = async (req, res, next) => {
       },
     });
   } catch (err) {
-    console.error(err);
-    res
-      .status(500)
-      .json({ status: "error", message: "Error creating shipment." });
+    respondWithError(res, 500, "Error creating shipment.", err);
   }
 };
 
@@ -43,10 +41,7 @@ exports.getShipments = async (req, res, next) => {
       },
     });
   } catch (err) {
-    console.error(err);
-    res
-      .status(500)
-      .json({ status: "error", message: "Error retrieving shipments." });
+    respondWithError(res, 500, "Error retrieving shipments.", err);
   }
 };
 
@@ -54,9 +49,7 @@ exports.getShipmentById = async (req, res, next) => {
   try {
     const shipment = await shipmentService.getShipmentById(req.params.id);
     if (!shipment) {
-      return res
-        .status(404)
-        .json({ status: "error", message: "Shipment not found." });
+      return respondWithError(res, 404, "Shipment not found.", null);
     }
 
     res.status(200).json({
@@ -66,10 +59,7 @@ exports.getShipmentById = async (req, res, next) => {
       },
     });
   } catch (err) {
-    console.error(err);
-    res
-      .status(500)
-      .json({ status: "error", message: "Error retrieving shipment." });
+    respondWithError(res, 500, "Error retrieving shipment.", err);
   }
 };
 
@@ -83,10 +73,7 @@ exports.getItems = async (req, res, next) => {
       },
     });
   } catch (err) {
-    console.error(err);
-    res
-      .status(500)
-      .json({ status: "error", message: "Error retrieving items." });
+    respondWithError(res, 500, "Error retrieving items.", err);
   }
 };
 
@@ -102,10 +89,7 @@ exports.recordShipmentEvent = async (req, res, next) => {
       data: { event },
     });
   } catch (err) {
-    console.error(err);
-    res.status(err.message === "Shipment not found" ? 404 : 400).json({
-      status: "error",
-      message: err.message,
-    });
+    const statusCode = err.message === "Shipment not found" ? 404 : 400;
+    respondWithError(res, statusCode, err.message, err);
   }
 };

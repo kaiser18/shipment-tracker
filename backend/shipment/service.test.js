@@ -58,6 +58,28 @@ test.after(() => {
   }
 });
 
+test("getNextShipmentStatus resolves the next state in the shipment lifecycle", () => {
+  assert.strictEqual(shipmentService.getNextShipmentStatus("pending"), "in transit");
+  assert.strictEqual(shipmentService.getNextShipmentStatus("out for delivery"), "delivered");
+  assert.strictEqual(shipmentService.getNextShipmentStatus("delivered"), null);
+});
+
+test("assertValidShipmentStatusTransition rejects invalid or skipped status changes", () => {
+  assert.doesNotThrow(() =>
+    shipmentService.assertValidShipmentStatusTransition("pending", "in transit"),
+  );
+
+  assert.throws(
+    () => shipmentService.assertValidShipmentStatusTransition("pending", "at hub"),
+    { message: "Next shipment status must be in transit" },
+  );
+
+  assert.throws(
+    () => shipmentService.assertValidShipmentStatusTransition("delivered", "delivered"),
+    { message: "Next shipment status must be none" },
+  );
+});
+
 test("createShipment delegates to Shipment.create", async () => {
   const shipmentData = {
     address: "12 Main Street",
