@@ -18,121 +18,121 @@ const seedDatabase = async () => {
   const shipments = await Shipment.bulkCreate(
     [
       {
-        address: "12 Oak Avenue, Portland",
+        destination: "12 Oak Avenue, Portland",
         promisedDate: "2026-09-18T17:00:00",
         status: "pending",
         userId: users[0].id,
       },
       {
-        address: "88 Market Street, Seattle",
+        destination: "88 Market Street, Seattle",
         promisedDate: "2026-09-16T09:30:00",
         status: "in transit",
         userId: users[0].id,
       },
       {
-        address: "405 Pine Road, Denver",
+        destination: "405 Pine Road, Denver",
         promisedDate: "2026-09-14T14:15:00",
         status: "delivered",
         userId: users[1].id,
       },
       {
-        address: "7 Harbor Lane, Boston",
+        destination: "7 Harbor Lane, Boston",
         promisedDate: "2026-09-22T11:45:00",
         status: "at hub",
         userId: users[1].id,
       },
       {
-        address: "29 River Road, Austin",
+        destination: "29 River Road, Austin",
         promisedDate: "2026-09-12T16:30:00",
         status: "pending",
         userId: users[0].id,
       },
       {
-        address: "64 Sunset Boulevard, Phoenix",
+        destination: "64 Sunset Boulevard, Phoenix",
         promisedDate: "2026-09-16T18:00:00",
         status: "out for delivery",
         userId: users[1].id,
       },
       {
-        address: "17 Lakeview Drive, Chicago",
+        destination: "17 Lakeview Drive, Chicago",
         promisedDate: "2026-09-11T10:00:00",
         status: "in transit",
         userId: users[1].id,
       },
       {
-        address: "52 Elm Street, San Francisco",
+        destination: "52 Elm Street, San Francisco",
         promisedDate: "2026-09-19T13:00:00",
         status: "pending",
         userId: users[0].id,
       },
       {
-        address: "103 Maple Avenue, Dallas",
+        destination: "103 Maple Avenue, Dallas",
         promisedDate: "2026-09-17T15:30:00",
         status: "in transit",
         userId: users[1].id,
       },
       {
-        address: "26 Cedar Court, Atlanta",
+        destination: "26 Cedar Court, Atlanta",
         promisedDate: "2026-09-20T09:15:00",
         status: "at hub",
         userId: users[0].id,
       },
       {
-        address: "71 Birch Road, Miami",
+        destination: "71 Birch Road, Miami",
         promisedDate: "2026-09-21T17:45:00",
         status: "out for delivery",
         userId: users[1].id,
       },
       {
-        address: "9 Willow Lane, Minneapolis",
+        destination: "9 Willow Lane, Minneapolis",
         promisedDate: "2026-09-15T08:30:00",
         status: "pending",
         userId: users[0].id,
       },
       {
-        address: "144 Spruce Street, Nashville",
+        destination: "144 Spruce Street, Nashville",
         promisedDate: "2026-09-23T12:00:00",
         status: "delivered",
         userId: users[1].id,
       },
       {
-        address: "38 Aspen Drive, Salt Lake City",
+        destination: "38 Aspen Drive, Salt Lake City",
         promisedDate: "2026-09-18T16:45:00",
         status: "in transit",
         userId: users[0].id,
       },
       {
-        address: "215 Walnut Avenue, Charlotte",
+        destination: "215 Walnut Avenue, Charlotte",
         promisedDate: "2026-09-24T10:30:00",
         status: "at hub",
         userId: users[1].id,
       },
       {
-        address: "63 Poplar Street, Columbus",
+        destination: "63 Poplar Street, Columbus",
         promisedDate: "2026-09-16T20:00:00",
         status: "out for delivery",
         userId: users[0].id,
       },
       {
-        address: "87 Fir Road, Raleigh",
+        destination: "87 Fir Road, Raleigh",
         promisedDate: "2026-09-22T14:00:00",
         status: "pending",
         userId: users[1].id,
       },
       {
-        address: "190 Chestnut Lane, Cleveland",
+        destination: "190 Chestnut Lane, Cleveland",
         promisedDate: "2026-09-14T11:30:00",
         status: "delivered",
         userId: users[0].id,
       },
       {
-        address: "44 Hawthorn Court, Richmond",
+        destination: "44 Hawthorn Court, Richmond",
         promisedDate: "2026-09-19T09:45:00",
         status: "in transit",
         userId: users[1].id,
       },
       {
-        address: "120 Magnolia Boulevard, New Orleans",
+        destination: "120 Magnolia Boulevard, New Orleans",
         promisedDate: "2026-09-25T18:30:00",
         status: "at hub",
         userId: users[0].id,
@@ -199,7 +199,9 @@ const seedDatabase = async () => {
   const allEventDefinitions = eventDefinitions.concat(
     shipments
       .slice(7)
-      .map((shipment) => [[shipment.status, "2026-09-16", shipment.address]]),
+      .map((shipment) => [
+        [shipment.status, "2026-09-16", shipment.destination],
+      ]),
   );
 
   await Event.bulkCreate(
